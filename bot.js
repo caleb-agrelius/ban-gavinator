@@ -41,7 +41,7 @@ const insultingWords = [
     'stupid',
     'an idiot'
 ];
-
+// Ryans user id
 const targetUserId = '300683364485038080';
 
 // Events.ClientReady is an event that is emitted when the bot is ready, we then pass that as a value readyClient which represents
