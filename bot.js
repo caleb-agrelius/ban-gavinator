@@ -1,5 +1,32 @@
 require('dotenv').config();
 const { Client, GatewayIntentBits, Events } = require('discord.js');
+const express = require('express');
+const app = express();
+const port = 3000;
+
+
+const dexcomclientid = process.env.DEXCOM_CLIENT_ID;
+const dexcomsecret = process.env.DEXCOM_SECRET;
+const dexcomredirect = encodeURIComponent('http://localhost:3000/callback');
+const scope = 'offline_access';
+const state = '1234567890';
+
+const dexcomAuthURl = `https://api.dexcom.com/v2/oauth2/login?client_id=${dexcomclientid}&redirect_uri=${dexcomredirect}&response_type=code&scope=${scope}&state=${state}`;
+
+
+app.get('/callback', (req, res) => {
+    const code = req.query.code;
+
+    if (code) {
+        res.send('Success! You can now close this window.');
+    } else {
+        res.send('Failed to authenticate.');
+    }
+});
+
+app.listen(port, () => {
+    console.log('Listening on port ' + port);
+});
 
 const client = new Client({
     intents: [
