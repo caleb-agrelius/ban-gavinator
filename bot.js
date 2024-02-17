@@ -1,32 +1,7 @@
 require('dotenv').config();
 const { Client, GatewayIntentBits, Events } = require('discord.js');
-const express = require('express');
-const app = express();
-const port = 3000;
 
 
-const dexcomclientid = process.env.DEXCOM_CLIENT_ID;
-const dexcomsecret = process.env.DEXCOM_SECRET;
-const dexcomredirect = encodeURIComponent('http://localhost:3000/callback');
-const scope = 'offline_access';
-const state = '1234567890';
-
-const dexcomAuthURl = `https://api.dexcom.com/v2/oauth2/login?client_id=${dexcomclientid}&redirect_uri=${dexcomredirect}&response_type=code&scope=${scope}&state=${state}`;
-
-
-app.get('/callback', (req, res) => {
-    const code = req.query.code;
-
-    if (code) {
-        res.send('Success! You can now close this window.');
-    } else {
-        res.send('Failed to authenticate.');
-    }
-});
-
-app.listen(port, () => {
-    console.log('Listening on port ' + port);
-});
 
 const client = new Client({
     intents: [
@@ -49,6 +24,43 @@ const targetUserId = '300683364485038080';
 client.once(Events.ClientReady, readyClient => {
     console.log(`Ready! Logged in as ${readyClient.user.tag}`)
 });
+
+function getRandomNumber(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+
+class Enemy {
+    constructor() {
+        this.hp = 100;
+        this.name = 'Ryan'
+        this.attack = 10;
+    }
+
+}
+
+const enemy = new Enemy();
+client.on('messageCreate', (message) => {
+    if(message.content === 'ryan' || message.content === 'Ryan') {
+        if(enemy.hp > 0) {
+            const dmg = getRandomNumber(1, 20);
+            if(dmg > 14){
+                message.channel.send('CRITICAL HIT')
+            }
+            enemy.hp = enemy.hp - dmg;
+            message.channel.send(`Attacking ${enemy.name} for ${dmg}hp \n Ryan now has ${enemy.hp}hp`);
+        } else {
+            message.channel.send(`${enemy.name} has been defeated! Type *continue* to move on to the next boss!`);
+        }
+
+        if(message.content === 'continue' && enemy.hp >= 0) {
+            message.channel.send(`A wild ${enemy.name} blocks your path!`);
+            enemy.hp = 100;
+        }
+    }
+    
+})
+
 
 // Events.MessageCreate is an event that is emitted when a message is created, we then pass that as a value message which represents
 // the message that was created. We then check if the message mentions the target user, if it does we then send a message to the channel
@@ -81,8 +93,6 @@ client.on('messageCreate', (message) => {
             '               `-.__  `----"""    __.-\'\n' +
             '                  `--..____..--\'\n' +
             '```');
-    } else {
-        console.log(message);
     }
 });
 
