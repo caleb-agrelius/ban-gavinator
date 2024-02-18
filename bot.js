@@ -41,25 +41,26 @@ class Enemy {
 
 const enemy = new Enemy();
 client.on('messageCreate', (message) => {
-    if(message.content === 'ryan' || message.content === 'Ryan') {
+    if(message.content.toLowerCase() === 'ryan') {
         if(enemy.hp > 0) {
             const dmg = getRandomNumber(1, 20);
-            if(dmg > 14){
-                message.channel.send('CRITICAL HIT')
-            }
-            enemy.hp = enemy.hp - dmg;
+            if(dmg > 14) message.channel.send('CRITICAL HIT');
+            enemy.hp -= dmg;
             message.channel.send(`Attacking ${enemy.name} for ${dmg}hp \n Ryan now has ${enemy.hp}hp`);
         } else {
             message.channel.send(`${enemy.name} has been defeated! Type *continue* to move on to the next boss!`);
         }
-
-        if(message.content === 'continue' && enemy.hp >= 0) {
-            message.channel.send(`A wild ${enemy.name} blocks your path!`);
-            enemy.hp = 100;
-        }
     }
-    
-})
+
+    // Separate check for "continue" to ensure it's not nested within another condition
+    if(message.content.toLowerCase() === 'continue' && enemy.hp <= 0) {
+        enemy.hp = 100; // Reset enemy HP
+        message.channel.send(`A wild ${enemy.name} blocks your path!`);
+    } else if (message.content.toLowerCase() === 'continue' && enemy.hp > 0) {
+        message.channel.send("You cannot continue yet, the enemy is still standing!");
+    }
+});
+
 
 
 // Events.MessageCreate is an event that is emitted when a message is created, we then pass that as a value message which represents
