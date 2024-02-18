@@ -1,8 +1,6 @@
 require('dotenv').config();
 const { Client, GatewayIntentBits, Events } = require('discord.js');
 
-
-
 const client = new Client({
     intents: [
         GatewayIntentBits.Guilds,
@@ -31,33 +29,51 @@ function getRandomNumber(min, max) {
 
 
 class Enemy {
-    constructor() {
+    constructor(name, type) {
+        this.name = name;
+        this.type = type;
         this.hp = 100;
-        this.name = 'Ryan'
         this.attack = 10;
+        this.defense = 10;
     }
-
 }
 
-const enemy = new Enemy();
+function generateRandomEnemy() {
+      const names = ['Ryan', 'Caleb', 'Andrew', 'Gavin', 'Micheal', 'Sage', 'Elijah', 'Louie', 'Benjamin'];
+      const types = ['Tank', 'Support', 'Normal', 'Damage'];
+      const name = names[Math.floor(Math.random() * names.length)];
+      const type = types[Math.floor(Math.random() * types.length)];
+
+      return new Enemy(name, type);
+}
+
+const enemy = generateRandomEnemy();
 client.on('messageCreate', (message) => {
-    if(message.content.toLowerCase() === 'ryan') {
+    const theMessage = message.content.toLowerCase();
+    function sendMessage(arg) {
+        message.channel.send(arg);
+    }
+    if(theMessage === 'ryan') {
         if(enemy.hp > 0) {
             const dmg = getRandomNumber(1, 20);
-            if(dmg > 14) message.channel.send('CRITICAL HIT');
+            if(dmg > 14) sendMessage('CRITICAL HIT');
             enemy.hp -= dmg;
-            message.channel.send(`Attacking ${enemy.name} for ${dmg}hp \n Ryan now has ${enemy.hp}hp`);
+            sendMessage(`Attacking ${enemy.name} for ${dmg}hp \n ${enemy.name} now has ${enemy.hp}hp`);
         } else {
-            message.channel.send(`${enemy.name} has been defeated! Type *continue* to move on to the next boss!`);
+            sendMessage(`${enemy.name} has been defeated! Type *continue* to move on to the next boss!`);
         }
     }
 
     // Separate check for "continue" to ensure it's not nested within another condition
-    if(message.content.toLowerCase() === 'continue' && enemy.hp <= 0) {
+    if(theMessage === 'continue' && enemy.hp <= 0) {
         enemy.hp = 100; // Reset enemy HP
-        message.channel.send(`A wild ${enemy.name} blocks your path!`);
-    } else if (message.content.toLowerCase() === 'continue' && enemy.hp > 0) {
-        message.channel.send("You cannot continue yet, the enemy is still standing!");
+        sendMessage(`A wild ${enemy.name} blocks your path!`);
+    } else if (theMessage === 'continue' && enemy.hp > 0) {
+        sendMessage("You cannot continue yet, the enemy is still standing!");
+    }
+
+    if(message.author === targetUserId && (theMessage === 'please help' || theMessage === 'wtf')) {
+        sendMessage('Sorry Ryan');
     }
 });
 
@@ -74,29 +90,6 @@ client.on('messageCreate', (message) => {
         });
     }
 });
-
-// if client sends banan, send banana ascii art
-client.on('messageCreate', (message) => {
-    if (message.content === 'banan') {
-        message.channel.send('```\n' +
-            '     _\n' +
-            '   //\\\n' +
-            '  V  \\\n' +
-            '   \\  \\_\n' +
-            "    \\,'.`-.\n" +
-            '     |\\ `. `.\n' +
-            '     ( \\  `. `-.                        _,.-:\\\n' +
-            '      \\ \\   `.  `-._             __..--\' ,-\'\';/\n' +
-            '       \\ `.   `-.   `-..___..---\'   _.--\' ,\'/\n' +
-            '        `. `.    `-._        __..--\'    ,\' /\n' +
-            '          `. `-_     ``--..\'\'       _.-\' ,\'\n' +
-            '            `-_ `-.___        __,--\'   ,\'\n' +
-            '               `-.__  `----"""    __.-\'\n' +
-            '                  `--..____..--\'\n' +
-            '```');
-    }
-});
-
 
 // We login to the bot using the token that is stored in the .env file
 client.login(process.env.DISCORD_BOT_TOKEN);
