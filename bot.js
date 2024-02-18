@@ -39,7 +39,7 @@ class Enemy {
 }
 
 function generateRandomEnemy() {
-      const names = ['Ryan', 'Caleb', 'Andrew', 'Gavin', 'Micheal', 'Sage', 'Elijah', 'Louie', 'Benjamin'];
+      const names = ['Ryan', 'Caleb', 'Andrew', 'Gavin', 'Michael', 'Sage', 'Elijah', 'Louie', 'Benjamin'];
       const types = ['Tank', 'Support', 'Normal', 'Damage'];
       const name = names[Math.floor(Math.random() * names.length)];
       const type = types[Math.floor(Math.random() * types.length)];
@@ -47,7 +47,7 @@ function generateRandomEnemy() {
       return new Enemy(name, type);
 }
 
-const enemy = generateRandomEnemy();
+let enemy = generateRandomEnemy();
 client.on('messageCreate', (message) => {
     const theMessage = message.content.toLowerCase();
     function sendMessage(arg) {
@@ -66,7 +66,7 @@ client.on('messageCreate', (message) => {
 
     // Separate check for "continue" to ensure it's not nested within another condition
     if(theMessage === 'continue' && enemy.hp <= 0) {
-        enemy.hp = 100; // Reset enemy HP
+        enemy = generateRandomEnemy();
         sendMessage(`A wild ${enemy.name} blocks your path!`);
     } else if (theMessage === 'continue' && enemy.hp > 0) {
         sendMessage("You cannot continue yet, the enemy is still standing!");
