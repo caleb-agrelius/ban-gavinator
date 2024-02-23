@@ -1,21 +1,7 @@
 require('dotenv').config();
 const { Client, GatewayIntentBits, Events } = require('discord.js');
-
-const client = new Client({
-    intents: [
-        GatewayIntentBits.Guilds,
-        GatewayIntentBits.GuildMessages, 
-        GatewayIntentBits.MessageContent
-    ]
-});
-
-const insultingWords = [
-    'dumb',
-    'stupid',
-    'an idiot'
-];
-// Ryans user id
-const targetUserId = '300683364485038080';
+const { register } = require('./javascript/Register');
+const {generateRandomEnemy, getRandomNumber} = require('./javascript/utils');
 
 // Events.ClientReady is an event that is emitted when the bot is ready, we then pass that as a value readyClient which represents
 // the client that is ready. We then log the client's user tag to the console.
@@ -23,60 +9,30 @@ client.once(Events.ClientReady, readyClient => {
     console.log(`Ready! Logged in as ${readyClient.user.tag}`)
 });
 
-function getRandomNumber(min, max) {
-    return Math.floor(Math.random() * (max - min + 1)) + min;
-}
-
-
-class Enemy {
-    constructor(name, type) {
-        this.name = name;
-        this.type = type;
-        this.hp = 100;
-        this.attack = 10;
-        this.defense = 10;
-    }
-}
-
-function generateRandomEnemy() {
-      const names = ['Ryan', 'Caleb', 'Andrew', 'Gavin', 'Michael', 'Sage', 'Elijah', 'Louie', 'Benjamin'];
-      const types = ['Tank', 'Support', 'Normal', 'Damage'];
-      const name = names[Math.floor(Math.random() * names.length)];
-      const type = types[Math.floor(Math.random() * types.length)];
-
-      return new Enemy(name, type);
-}
-
 let enemy = generateRandomEnemy();
-client.on('messageCreate', (message) => {
+client.on('messageCreate', async (message) => {
+    if(message.author.bot) return;
+
     const theMessage = message.content.toLowerCase();
-    function sendMessage(arg) {
+    async function sendMessage(arg){
         message.channel.send(arg);
     }
-    if(theMessage === 'ryan') {
-        if(enemy.hp > 0) {
-            const dmg = getRandomNumber(1, 20);
-            if(dmg > 14) sendMessage('CRITICAL HIT');
-            enemy.hp -= dmg;
-            sendMessage(`Attacking ${enemy.name} for ${dmg}hp \n ${enemy.name} now has ${enemy.hp}hp`);
-        } else {
-            sendMessage(`${enemy.name} has been defeated! Type *continue* to move on to the next boss!`);
-        }
+    if(theMessage === '!register'){
+        register(message);
+    }
+    if(theMessage === '!pickClass'){
+        sendMessage('Choose your class: ');
+        sendMessage('1. Lil Castuh\n2. Lil Slicuh\n3. Big Tankuh');
     }
 
-    // Separate check for "continue" to ensure it's not nested within another condition
-    if(theMessage === 'continue' && enemy.hp <= 0) {
-        enemy = generateRandomEnemy();
-        sendMessage(`A wild ${enemy.name} blocks your path!`);
-    } else if (theMessage === 'continue' && enemy.hp > 0) {
-        sendMessage("You cannot continue yet, the enemy is still standing!");
+    if(theMessage === '!stats') {
+        sendMessage(`name: ${enemy.name} \n type: ${enemy.type} \n hp: ${enemy.hp}`)
     }
 
     if(message.author === targetUserId && (theMessage === 'please help' || theMessage === 'wtf')) {
         sendMessage('Sorry Ryan');
     }
 });
-
 
 
 // Events.MessageCreate is an event that is emitted when a message is created, we then pass that as a value message which represents
